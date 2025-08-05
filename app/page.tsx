@@ -1,73 +1,306 @@
-export default function Home() {
-  return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <header className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              ApexMarketer-AI
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Senior multidisciplinary marketing strategist and operator with 15 years of B2B/B2C experience. 
-              Think systematically, execute pragmatically, keep constant eye on ROI.
-            </p>
-          </header>
+'use client'
 
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="grid md:grid-cols-2 gap-8">
-              <div>
-                <h2 className="text-2xl font-semibold mb-4">Core Expertise</h2>
-                <ul className="space-y-2 text-gray-700">
-                  <li>• Growth strategy & budget allocation</li>
-                  <li>• Brand positioning & messaging</li>
-                  <li>• Content marketing & copywriting</li>
-                  <li>• SEO / SEM & Google Ads</li>
-                  <li>• Paid social & display advertising</li>
-                  <li>• Marketing automation & CRM workflows</li>
-                  <li>• Analytics & experimentation</li>
-                  <li>• Product-led growth & onboarding</li>
-                  <li>• Partner & channel marketing</li>
-                  <li>• Customer success & advocacy programs</li>
-                </ul>
-              </div>
-              
-              <div>
-                <h2 className="text-2xl font-semibold mb-4">Connected Tools</h2>
-                <ul className="space-y-2 text-gray-700">
-                  <li>• Airtable - Campaign & asset DB</li>
-                  <li>• Notion - Project management & knowledge base</li>
-                  <li>• Slack - Team communications</li>
-                  <li>• Google Analytics 4 - Web & funnel metrics</li>
-                  <li>• Search Console & SEMrush - Organic insights</li>
-                  <li>• HubSpot/Salesforce - Pipeline & attribution</li>
-                </ul>
+import { useState } from 'react'
+
+interface Message {
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: string
+  metadata?: any
+}
+
+interface ConfirmationDialog {
+  action: string
+  description: string
+  risks: string[]
+}
+
+export default function Home() {
+  const [messages, setMessages] = useState<Message[]>([])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [showConfirmation, setShowConfirmation] = useState<ConfirmationDialog | null>(null)
+  const [pendingMessage, setPendingMessage] = useState('')
+
+  const handleSend = async (messageToSend?: string, confirmed = false) => {
+    const currentMessage = messageToSend || input
+    if (!currentMessage.trim() || loading) return
+
+    setLoading(true)
+    
+    const userMessage: Message = {
+      role: 'user',
+      content: currentMessage,
+      timestamp: new Date().toISOString()
+    }
+    
+    if (!messageToSend) {
+      setMessages(prev => [...prev, userMessage])
+      setInput('')
+    }
+
+    try {
+      const response = await fetch('/api/agent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: currentMessage,
+          confirmed
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.requiresConfirmation) {
+        setShowConfirmation({
+          action: data.action,
+          description: data.description,
+          risks: data.risks
+        })
+        setPendingMessage(currentMessage)
+        setLoading(false)
+        return
+      }
+
+      if (response.ok) {
+        const assistantMessage: Message = {
+          role: 'assistant',
+          content: data.response,
+          timestamp: new Date().toISOString(),
+          metadata: data.metadata
+        }
+        setMessages(prev => messageToSend ? [...prev, userMessage, assistantMessage] : [...prev, assistantMessage])
+      } else {
+        const errorMessage: Message = {
+          role: 'assistant',
+          content: `Error: ${data.error || 'Something went wrong'}`,
+          timestamp: new Date().toISOString()
+        }
+        setMessages(prev => [...prev, errorMessage])
+      }
+    } catch (error) {
+      console.error('Chat error:', error)
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: 'Error: Failed to communicate with ApexMarketer-AI',
+        timestamp: new Date().toISOString()
+      }
+      setMessages(prev => [...prev, errorMessage])
+    }
+
+    setLoading(false)
+  }
+
+  const handleConfirm = () => {
+    setShowConfirmation(null)
+    handleSend(pendingMessage, true)
+    setPendingMessage('')
+  }
+
+  const handleCancel = () => {
+    setShowConfirmation(null)
+    setPendingMessage('')
+    setLoading(false)
+  }
+
+  const quickActions = [
+    "Audit my website's SEO and find quick wins",
+    "Draft LinkedIn ads for B2B lead generation",
+    "Analyze funnel metrics and suggest improvements", 
+    "Create email campaign for product launch",
+    "More"
+  ]
+
+  return (
+    <div className="flex h-screen bg-white">
+      {/* Sidebar */}
+      <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col">
+        <div className="p-4 border-b border-gray-200">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">AM</span>
+            </div>
+            <span className="font-semibold text-gray-900">ApexMarketer-AI</span>
+          </div>
+        </div>
+        
+        <nav className="flex-1 p-4">
+          <div className="space-y-2">
+            <div className="text-sm font-medium text-gray-700 mb-3">Marketing Tools</div>
+            <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Strategy & Planning</a>
+            <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Content & Copy</a>
+            <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">SEO & SEM</a>
+            <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Paid Advertising</a>
+            <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Analytics</a>
+            <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Automation</a>
+            <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">Growth Hacking</a>
+          </div>
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <header className="border-b border-gray-200 bg-white px-6 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-lg font-semibold text-gray-900">ApexMarketer-AI</h1>
+            <div className="flex items-center space-x-4">
+              <button className="p-2 text-gray-400 hover:text-gray-600">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Chat Area */}
+        <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
+          {messages.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center px-6">
+              <div className="text-center max-w-2xl">
+                <div className="mb-8">
+                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-white font-bold text-xl">AM</span>
+                  </div>
+                  <h2 className="text-3xl font-semibold text-gray-900 mb-4">What can I help with?</h2>
+                  <p className="text-gray-600 mb-8">Senior marketing strategist with 15 years of B2B/B2C experience</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  {quickActions.slice(0, 4).map((action, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setInput(action)}
+                      className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="text-sm text-gray-700">{action}</div>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex justify-center">
+                  <button className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50">
+                    More
+                  </button>
+                </div>
               </div>
             </div>
-
-            <div className="mt-8 p-6 bg-gray-50 rounded-lg">
-              <h3 className="text-lg font-semibold mb-3">Operating Process</h3>
-              <div className="flex items-center space-x-4 text-gray-700 mb-6">
-                <span className="bg-blue-100 px-3 py-1 rounded">Think</span>
-                <span>→</span>
-                <span className="bg-green-100 px-3 py-1 rounded">Plan</span>
-                <span>→</span>
-                <span className="bg-yellow-100 px-3 py-1 rounded">Execute</span>
-                <span>→</span>
-                <span className="bg-purple-100 px-3 py-1 rounded">Report</span>
+          ) : (
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              <div className="space-y-6">
+                {messages.map((message, index) => (
+                  <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`flex space-x-3 max-w-3xl ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        message.role === 'user' 
+                          ? 'bg-gray-700' 
+                          : 'bg-gradient-to-r from-blue-500 to-purple-600'
+                      }`}>
+                        <span className="text-white text-sm font-medium">
+                          {message.role === 'user' ? 'U' : 'AM'}
+                        </span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="prose prose-sm max-w-none">
+                          <div className="whitespace-pre-wrap text-gray-900">{message.content}</div>
+                        </div>
+                        {message.metadata && (
+                          <div className="text-xs text-gray-500 mt-2">
+                            Task: {message.metadata.taskType} • Tokens: {message.metadata.tokens}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {loading && (
+                  <div className="flex justify-start">
+                    <div className="flex space-x-3 max-w-3xl">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                        <span className="text-white text-sm font-medium">AM</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 text-gray-500">
+                          <div className="animate-pulse">ApexMarketer-AI is thinking...</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-              
-              <div className="text-center">
-                <a 
-                  href="/chat" 
-                  className="inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+            </div>
+          )}
+
+          {/* Input Area */}
+          <div className="border-t border-gray-200 px-6 py-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="relative">
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      handleSend()
+                    }
+                  }}
+                  placeholder="Message ApexMarketer-AI..."
+                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={1}
+                  disabled={loading}
+                />
+                <button
+                  onClick={() => handleSend()}
+                  disabled={loading || !input.trim()}
+                  className="absolute right-3 top-3 p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Start Chat with ApexMarketer-AI
-                </a>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </main>
+
+      {/* Confirmation Dialog */}
+      {showConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-3">Confirmation Required</h3>
+            <p className="text-gray-700 mb-4">{showConfirmation.description}</p>
+            
+            <div className="mb-4">
+              <h4 className="font-medium text-red-600 mb-2">Potential Risks:</h4>
+              <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                {showConfirmation.risks.map((risk, index) => (
+                  <li key={index}>{risk}</li>
+                ))}
+              </ul>
+            </div>
+            
+            <div className="flex space-x-3">
+              <button
+                onClick={handleCancel}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirm}
+                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+              >
+                Proceed Anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
