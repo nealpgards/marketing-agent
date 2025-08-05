@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import MessageRenderer from '@/components/MessageRenderer'
+import { ConversationStorage, type Conversation } from '@/lib/conversationStorage'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -22,10 +23,98 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState<ConfirmationDialog | null>(null)
   const [pendingMessage, setPendingMessage] = useState('')
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
+  
+  // Load conversations on mount
+  useEffect(() => {
+    const savedConversations = ConversationStorage.getAllConversations()
+    const currentId = ConversationStorage.getCurrentConversationId()
+    
+    setConversations(savedConversations)
+    setCurrentConversationId(currentId)
+    
+    // Load current conversation messages
+    if (currentId) {
+      const currentConversation = ConversationStorage.getConversation(currentId)
+      if (currentConversation) {
+        setMessages(currentConversation.messages)
+      }
+    }
+  }, [])
+
+  // Save conversation whenever messages change
+  useEffect(() => {
+    if (messages.length > 0 && currentConversationId) {
+      const conversation = ConversationStorage.getConversation(currentConversationId)
+      if (conversation) {
+        conversation.messages = messages
+        conversation.updatedAt = new Date().toISOString()
+        
+        // Update title if it's still the default
+        if (conversation.title === 'New Conversation' && messages.length >= 2) {
+          conversation.title = ConversationStorage.generateTitle(messages)
+        }
+        
+        ConversationStorage.saveConversation(conversation)
+        
+        // Refresh conversations list
+        setConversations(ConversationStorage.getAllConversations())
+      }
+    }
+  }, [messages, currentConversationId])
+
+  const startNewConversation = () => {
+    const newConversation = ConversationStorage.createNewConversation()
+    ConversationStorage.saveConversation(newConversation)
+    ConversationStorage.setCurrentConversationId(newConversation.id)
+    
+    setCurrentConversationId(newConversation.id)
+    setMessages([])
+    setInput('')
+    setConversations(ConversationStorage.getAllConversations())
+  }
+
+  const loadConversation = (conversationId: string) => {
+    const conversation = ConversationStorage.getConversation(conversationId)
+    if (conversation) {
+      setMessages(conversation.messages)
+      setCurrentConversationId(conversationId)
+      ConversationStorage.setCurrentConversationId(conversationId)
+    }
+  }
+
+  const deleteConversation = (conversationId: string, event: React.MouseEvent) => {
+    event.stopPropagation()
+    ConversationStorage.deleteConversation(conversationId)
+    
+    const updatedConversations = ConversationStorage.getAllConversations()
+    setConversations(updatedConversations)
+    
+    // If we deleted the current conversation, start a new one
+    if (conversationId === currentConversationId) {
+      if (updatedConversations.length > 0) {
+        loadConversation(updatedConversations[0].id)
+      } else {
+        startNewConversation()
+      }
+    }
+  }
 
   const handleSend = async (messageToSend?: string, confirmed = false) => {
     const currentMessage = messageToSend || input
     if (!currentMessage.trim() || loading) return
+
+    // Create new conversation if none exists
+    let conversationId = currentConversationId
+    if (!conversationId) {
+      const newConversation = ConversationStorage.createNewConversation()
+      ConversationStorage.saveConversation(newConversation)
+      ConversationStorage.setCurrentConversationId(newConversation.id)
+      conversationId = newConversation.id
+      setCurrentConversationId(conversationId)
+      setConversations(ConversationStorage.getAllConversations())
+    }
 
     setLoading(true)
     
@@ -190,60 +279,153 @@ export default function Home() {
 
   return (
     <div style={mainContainerStyle}>
-      {/* Sidebar */}
+      {/* Sidebar - Conversation History */}
       <div style={sidebarStyle}>
         <div style={{ padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{
-              width: '32px',
-              height: '32px',
-              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-              borderRadius: '8px',
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '32px',
+                height: '32px',
+                background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: '14px'
+              }}>
+                AM
+              </div>
+              <span style={{ fontWeight: '600', color: '#111827', fontSize: '16px' }}>ApexMarketer-AI</span>
+            </div>
+          </div>
+          
+          <button
+            onClick={startNewConversation}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              backgroundColor: '#f3f4f6',
+              border: '1px solid #e5e7eb',
+              borderRadius: '6px',
+              fontSize: '14px',
+              color: '#374151',
+              cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontWeight: 'bold',
-              fontSize: '14px'
-            }}>
-              AM
-            </div>
-            <span style={{ fontWeight: '600', color: '#111827' }}>ApexMarketer-AI</span>
-          </div>
+              gap: '8px',
+              justifyContent: 'center'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e5e7eb'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+          >
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            New Conversation
+          </button>
         </div>
         
-        <nav style={{ flex: 1, padding: '16px' }}>
-          <div style={{ fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '12px' }}>
-            Marketing Tools
+        <div style={{ flex: 1, padding: '8px', overflowY: 'auto' }}>
+          <div style={{ fontSize: '12px', fontWeight: '500', color: '#6b7280', marginBottom: '8px', padding: '0 8px' }}>
+            Recent Conversations
           </div>
-          {[
-            'Strategy & Planning',
-            'Content & Copy', 
-            'SEO & SEM',
-            'Paid Advertising',
-            'Analytics',
-            'Automation',
-            'Growth Hacking'
-          ].map((item, index) => (
-            <a 
-              key={index}
-              href="#" 
-              style={{
-                display: 'block',
-                padding: '8px 12px',
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            {conversations.length === 0 ? (
+              <div style={{ 
+                padding: '16px 8px', 
+                textAlign: 'center', 
+                color: '#9ca3af', 
                 fontSize: '14px',
-                color: '#6b7280',
-                textDecoration: 'none',
-                borderRadius: '6px',
-                marginBottom: '4px'
-              }}
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              {item}
-            </a>
-          ))}
-        </nav>
+                fontStyle: 'italic'
+              }}>
+                No conversations yet
+              </div>
+            ) : (
+              conversations.map((conversation) => (
+                <div
+                  key={conversation.id}
+                  onClick={() => loadConversation(conversation.id)}
+                  style={{
+                    padding: '12px 8px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    backgroundColor: conversation.id === currentConversationId ? '#eff6ff' : 'transparent',
+                    border: conversation.id === currentConversationId ? '1px solid #bfdbfe' : '1px solid transparent',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    group: 'conversation-item'
+                  }}
+                  onMouseOver={(e) => {
+                    if (conversation.id !== currentConversationId) {
+                      e.currentTarget.style.backgroundColor = '#f9fafb'
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (conversation.id !== currentConversationId) {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ 
+                      color: conversation.id === currentConversationId ? '#1d4ed8' : '#374151',
+                      fontWeight: conversation.id === currentConversationId ? '500' : '400',
+                      marginBottom: '2px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {conversation.title}
+                    </div>
+                    <div style={{ 
+                      fontSize: '12px', 
+                      color: '#9ca3af',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {conversation.messages.length} messages • {new Date(conversation.updatedAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                  
+                  <button
+                    onClick={(e) => deleteConversation(conversation.id, e)}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      color: '#9ca3af',
+                      cursor: 'pointer',
+                      borderRadius: '4px',
+                      marginLeft: '8px',
+                      opacity: 0.6
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = '#fee2e2'
+                      e.currentTarget.style.color = '#dc2626'
+                      e.currentTarget.style.opacity = '1'
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                      e.currentTarget.style.color = '#9ca3af'
+                      e.currentTarget.style.opacity = '0.6'
+                    }}
+                  >
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Main Content */}
