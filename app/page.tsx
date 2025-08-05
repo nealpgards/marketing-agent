@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import MessageRenderer from '@/components/MessageRenderer'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -116,7 +117,7 @@ export default function Home() {
   return (
     <div className="flex h-screen bg-white">
       {/* Sidebar */}
-      <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col">
+      <div className="hidden md:flex w-64 bg-gray-50 border-r border-gray-200 flex-col">
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
@@ -143,9 +144,14 @@ export default function Home() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="border-b border-gray-200 bg-white px-6 py-4">
+        <header className="border-b border-gray-200 bg-white px-4 md:px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold text-gray-900">ApexMarketer-AI</h1>
+            <div className="flex items-center space-x-3">
+              <div className="md:hidden w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">AM</span>
+              </div>
+              <h1 className="text-lg font-semibold text-gray-900">ApexMarketer-AI</h1>
+            </div>
             <div className="flex items-center space-x-4">
               <button className="p-2 text-gray-400 hover:text-gray-600">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,24 +165,24 @@ export default function Home() {
         {/* Chat Area */}
         <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
           {messages.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center px-6">
-              <div className="text-center max-w-2xl">
+            <div className="flex-1 flex items-center justify-center px-4 md:px-6">
+              <div className="text-center max-w-2xl w-full">
                 <div className="mb-8">
                   <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-white font-bold text-xl">AM</span>
                   </div>
-                  <h2 className="text-3xl font-semibold text-gray-900 mb-4">What can I help with?</h2>
+                  <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-4">What can I help with?</h2>
                   <p className="text-gray-600 mb-8">Senior marketing strategist with 15 years of B2B/B2C experience</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
                   {quickActions.slice(0, 4).map((action, index) => (
                     <button
                       key={index}
                       onClick={() => setInput(action)}
-                      className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm md:text-base"
                     >
-                      <div className="text-sm text-gray-700">{action}</div>
+                      <div className="text-gray-700">{action}</div>
                     </button>
                   ))}
                 </div>
@@ -189,11 +195,11 @@ export default function Home() {
               </div>
             </div>
           ) : (
-            <div className="flex-1 overflow-y-auto px-6 py-4">
+            <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4">
               <div className="space-y-6">
                 {messages.map((message, index) => (
                   <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`flex space-x-3 max-w-3xl ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                    <div className={`flex space-x-3 w-full max-w-4xl ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                         message.role === 'user' 
                           ? 'bg-gray-700' 
@@ -203,13 +209,16 @@ export default function Home() {
                           {message.role === 'user' ? 'U' : 'AM'}
                         </span>
                       </div>
-                      <div className="flex-1">
-                        <div className="prose prose-sm max-w-none">
-                          <div className="whitespace-pre-wrap text-gray-900">{message.content}</div>
-                        </div>
+                      <div className="flex-1 min-w-0">
+                        <MessageRenderer content={message.content} role={message.role} />
                         {message.metadata && (
-                          <div className="text-xs text-gray-500 mt-2">
-                            Task: {message.metadata.taskType} • Tokens: {message.metadata.tokens}
+                          <div className="text-xs text-gray-500 mt-3 pt-2 border-t border-gray-100">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-600 mr-2">
+                              {message.metadata.taskType}
+                            </span>
+                            <span className="text-gray-400">
+                              {message.metadata.tokens} tokens
+                            </span>
                           </div>
                         )}
                       </div>
@@ -236,7 +245,7 @@ export default function Home() {
           )}
 
           {/* Input Area */}
-          <div className="border-t border-gray-200 px-6 py-4">
+          <div className="border-t border-gray-200 px-4 md:px-6 py-4">
             <div className="max-w-4xl mx-auto">
               <div className="relative">
                 <textarea
@@ -249,7 +258,7 @@ export default function Home() {
                     }
                   }}
                   placeholder="Message ApexMarketer-AI..."
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
                   rows={1}
                   disabled={loading}
                 />
