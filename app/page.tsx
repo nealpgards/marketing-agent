@@ -358,8 +358,7 @@ export default function Home() {
                     border: conversation.id === currentConversationId ? '1px solid #bfdbfe' : '1px solid transparent',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    group: 'conversation-item'
+                    justifyContent: 'space-between'
                   }}
                   onMouseOver={(e) => {
                     if (conversation.id !== currentConversationId) {
