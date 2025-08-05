@@ -200,7 +200,7 @@ export default function Home() {
       console.error('Chat error:', error)
       const errorMessage: Message = {
         role: 'assistant',
-        content: 'Error: Failed to communicate with ApexMarketer-AI',
+        content: 'Error: Failed to communicate with nealy.ai',
         timestamp: new Date().toISOString()
       }
       setMessages(prev => [...prev, errorMessage])
@@ -246,7 +246,7 @@ export default function Home() {
     display: 'flex',
     height: '100vh',
     backgroundColor: '#ffffff',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontFamily: 'inherit',
   }
 
   const chatAreaStyle = {
@@ -322,9 +322,9 @@ export default function Home() {
                 fontWeight: 'bold',
                 fontSize: '14px'
               }}>
-                AM
+                N
               </div>
-              <span style={{ fontWeight: '600', color: '#111827', fontSize: '16px' }}>ApexMarketer-AI</span>
+              <span style={{ fontWeight: '600', color: '#111827', fontSize: '16px' }}>nealy.ai</span>
             </div>
           </div>
           
@@ -512,7 +512,7 @@ export default function Home() {
         <header style={headerStyle}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <h1 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: 0 }}>
-              ApexMarketer-AI
+              nealy.ai
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <button style={{ padding: '8px', backgroundColor: 'transparent', border: 'none', color: '#9ca3af', cursor: 'pointer' }}>
@@ -543,13 +543,13 @@ export default function Home() {
                     fontWeight: 'bold',
                     fontSize: '20px'
                   }}>
-                    AM
+                    N
                   </div>
                   <h2 style={{ fontSize: '30px', fontWeight: '600', color: '#111827', marginBottom: '16px', margin: '0 0 16px 0' }}>
                     What can I help with?
                   </h2>
                   <p style={{ color: '#6b7280', marginBottom: '32px', margin: '0 0 32px 0' }}>
-                    Senior marketing strategist with 15 years of B2B/B2C experience
+                    I'm Neal's AI marketing assistant, ready to transform your marketing strategy
                   </p>
                 </div>
 
@@ -608,7 +608,7 @@ export default function Home() {
                         fontSize: '14px',
                         fontWeight: '500'
                       }}>
-                        {message.role === 'user' ? 'U' : 'AM'}
+                        {message.role === 'user' ? 'U' : 'N'}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <MessageRenderer content={message.content} role={message.role} />
@@ -660,11 +660,11 @@ export default function Home() {
                         fontSize: '14px',
                         fontWeight: '500'
                       }}>
-                        AM
+                        N
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6b7280' }}>
-                          <div>ApexMarketer-AI is thinking...</div>
+                          <div>nealy.ai is thinking...</div>
                         </div>
                       </div>
                     </div>
@@ -687,7 +687,7 @@ export default function Home() {
                       handleSend()
                     }
                   }}
-                  placeholder="Message ApexMarketer-AI..."
+                  placeholder="Message nealy.ai..."
                   style={inputStyle}
                   rows={1}
                   disabled={loading}

@@ -1,5 +1,5 @@
 {
-  "name": "marketing-agent",
+  "name": "nealy-ai",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -11,12 +11,13 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "nealy.ai - Neal's AI marketing assistant for strategic marketing and operations",
   "dependencies": {
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^24.2.0",
     "@types/react": "^19.1.9",
     "autoprefixer": "^10.4.21",
+    "geist": "^1.4.2",
     "next": "^14.2.31",
     "postcss": "^8.5.6",
     "react": "^18.3.1",

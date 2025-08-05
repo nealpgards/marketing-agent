@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { GeistSans } from 'geist/font/sans'
 
 export const metadata: Metadata = {
-  title: 'ApexMarketer-AI',
-  description: 'Senior multidisciplinary marketing strategist and operator AI agent',
+  title: 'nealy.ai',
+  description: 'Neal\'s AI marketing assistant - Your personal marketing strategist and operator',
 }
 
 export default function RootLayout({
@@ -12,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={GeistSans.className}>
       <body className="bg-white text-gray-900 antialiased">
         {children}
       </body>

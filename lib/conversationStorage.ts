@@ -12,8 +12,8 @@ export interface Conversation {
 }
 
 export class ConversationStorage {
-  private static readonly STORAGE_KEY = 'apexmarketer-conversations'
-  private static readonly CURRENT_CONVERSATION_KEY = 'apexmarketer-current-conversation'
+  private static readonly STORAGE_KEY = 'nealy-ai-conversations'
+  private static readonly CURRENT_CONVERSATION_KEY = 'nealy-ai-current-conversation'
 
   static getAllConversations(): Conversation[] {
     if (typeof window === 'undefined') return []

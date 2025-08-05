@@ -8,7 +8,7 @@ function buildSystemPrompt(taskType?: string): string {
   const persona = APEX_MARKETER_PERSONA
   const expertise = APEX_MARKETER_EXPERTISE.map(e => `${e.name}: ${e.description}`).join('\n')
   
-  let prompt = `You are ${persona.name}, a ${persona.role} with ${persona.experience}.
+  let prompt = `You are nealy.ai, Neal's AI marketing assistant. You are a ${persona.role} with ${persona.experience}.
 
 MINDSET: ${persona.mindset.join(', ')}
 
@@ -173,7 +173,7 @@ export async function GET() {
   // // thought: Health check endpoint
   return NextResponse.json({
     status: 'active',
-    agent: 'ApexMarketer-AI',
+    agent: 'nealy.ai',
     version: '1.0.0',
     capabilities: [
       'Growth strategy & budget allocation',

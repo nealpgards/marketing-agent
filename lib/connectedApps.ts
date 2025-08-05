@@ -11,7 +11,7 @@ export interface ConnectedApp {
 }
 
 export class ConnectedAppsStorage {
-  private static readonly STORAGE_KEY = 'apexmarketer-connected-apps'
+  private static readonly STORAGE_KEY = 'nealy-ai-connected-apps'
 
   static getConnectedApps(): ConnectedApp[] {
     if (typeof window === 'undefined') return this.getDefaultApps()
@@ -57,19 +57,19 @@ export class ConnectedAppsStorage {
         icon: '💬',
         connected: false,
         setupInstructions: {
-          title: 'Connect Slack to ApexMarketer-AI',
+          title: 'Connect Slack to nealy.ai',
           steps: [
             'Go to your Slack workspace settings',
             'Navigate to "Apps" in the left sidebar',
             'Click "Build" and then "Create an App"',
-            'Choose "From scratch" and name it "ApexMarketer-AI"',
+            'Choose "From scratch" and name it "nealy.ai"',
             'Go to "OAuth & Permissions" in the left sidebar',
             'Add these Bot Token Scopes: channels:read, chat:write, users:read',
             'Click "Install to Workspace" and authorize the app',
             'Copy the "Bot User OAuth Token" that starts with "xoxb-"',
-            'Paste the token in ApexMarketer-AI settings'
+            'Paste the token in nealy.ai settings'
           ],
-          note: 'This will allow ApexMarketer-AI to send marketing insights and reports directly to your Slack channels.'
+          note: 'This will allow nealy.ai to send marketing insights and reports directly to your Slack channels.'
         }
       },
       {
@@ -78,19 +78,19 @@ export class ConnectedAppsStorage {
         icon: '📝',
         connected: false,
         setupInstructions: {
-          title: 'Connect Notion to ApexMarketer-AI',
+          title: 'Connect Notion to nealy.ai',
           steps: [
             'Go to https://www.notion.so/my-integrations',
             'Click "Create new integration"',
-            'Name it "ApexMarketer-AI" and select your workspace',
+            'Name it "nealy.ai" and select your workspace',
             'Click "Submit" to create the integration',
             'Copy the "Internal Integration Token"',
             'Go to your Notion workspace and create a new page for marketing data',
             'Click "Share" on the page and invite your integration',
-            'Search for "ApexMarketer-AI" and click "Invite"',
-            'Copy the page URL and paste both the token and URL in ApexMarketer-AI settings'
+            'Search for "nealy.ai" and click "Invite"',
+            'Copy the page URL and paste both the token and URL in nealy.ai settings'
           ],
-          note: 'This enables ApexMarketer-AI to create marketing reports, campaign plans, and content calendars directly in your Notion workspace.'
+          note: 'This enables nealy.ai to create marketing reports, campaign plans, and content calendars directly in your Notion workspace.'
         }
       },
       {
@@ -99,7 +99,7 @@ export class ConnectedAppsStorage {
         icon: '📁',
         connected: false,
         setupInstructions: {
-          title: 'Connect Google Drive to ApexMarketer-AI',
+          title: 'Connect Google Drive to nealy.ai',
           steps: [
             'Go to https://console.cloud.google.com/',
             'Create a new project or select an existing one',
@@ -107,12 +107,12 @@ export class ConnectedAppsStorage {
             'Go to "Credentials" and click "Create Credentials"',
             'Choose "OAuth 2.0 Client IDs"',
             'Select "Web application" as the application type',
-            'Add your ApexMarketer-AI domain to authorized origins',
+            'Add your nealy.ai domain to authorized origins',
             'Download the JSON credentials file',
-            'Upload the credentials file in ApexMarketer-AI settings',
+            'Upload the credentials file in nealy.ai settings',
             'Authorize access to your Google Drive'
           ],
-          note: 'This allows ApexMarketer-AI to save marketing assets, reports, and campaign materials directly to your Google Drive folders.'
+          note: 'This allows nealy.ai to save marketing assets, reports, and campaign materials directly to your Google Drive folders.'
         }
       }
     ]

@@ -1,27 +1,56 @@
-# ApexMarketer-AI
+# nealy.ai
 
-Senior multidisciplinary marketing strategist and operator AI agent with 15 years of B2B/B2C experience. Think systematically, execute pragmatically, keep constant eye on ROI.
+Neal's AI marketing assistant - your personal marketing strategist and operator. Built with modern web technologies and designed for professional marketing workflows.
 
-## Core Expertise
+## Overview
 
-1. Growth strategy & budget allocation
-2. Brand positioning & messaging  
-3. Content marketing & copywriting (web, email, social, video)
-4. SEO / SEM (technical SEO, keyword strategy, Google Ads)
-5. Paid social & display (Meta, LinkedIn, programmatic)
-6. Marketing automation & CRM workflows (HubSpot, Marketo, Salesforce)
-7. Analytics & experimentation (GA4, Looker, Tableau, A/B testing)
-8. Product-led growth & onboarding
-9. Partner & channel marketing
-10. Customer success & advocacy programs
+nealy.ai is Neal's personal AI marketing assistant that combines strategic thinking with tactical execution. Think of it as having a senior marketing strategist available 24/7 to help with everything from campaign planning to performance analysis.
+
+## Core Capabilities
+
+1. **Growth Strategy & Budget Allocation** - Strategic planning and ROI optimization
+2. **Brand Positioning & Messaging** - Brand strategy and value proposition development  
+3. **Content Marketing & Copywriting** - Content strategy, creation, and optimization
+4. **SEO / SEM** - Technical SEO, keyword strategy, and Google Ads management
+5. **Paid Social & Display** - Meta, LinkedIn, and programmatic advertising
+6. **Marketing Automation & CRM** - Workflow automation and lead nurturing
+7. **Analytics & Experimentation** - Data analysis, A/B testing, and performance measurement
+8. **Product-Led Growth** - PLG strategy and user onboarding optimization
+9. **Partner & Channel Marketing** - Partnership development and co-marketing
+10. **Customer Success & Advocacy** - Retention strategy and loyalty programs
 
 ## Tech Stack
 
 - **Framework**: Next.js 14 (App Router, Server Actions)
 - **Hosting**: Vercel (Production branch auto-deploy, preview URLs on PRs)
 - **Runtime**: Edge-optimized serverless functions
-- **Styling**: Tailwind CSS
+- **Styling**: Geist font + custom CSS
 - **Language**: TypeScript
+- **AI**: OpenAI GPT-4 Turbo
+
+## Features
+
+### 🤖 **Intelligent Chat Interface**
+- ChatGPT-style interface with conversation history
+- Smart task detection and response formatting
+- Context-aware responses with marketing expertise
+
+### 💬 **Conversation Management**
+- Persistent conversation history
+- Auto-generated conversation titles
+- Easy switching between past conversations
+- Local storage with 50 conversation limit
+
+### 🔗 **Connected Apps**
+- **Slack Integration** - Send insights directly to channels
+- **Notion Integration** - Create reports and campaign plans
+- **Google Drive Integration** - Save marketing assets and reports
+- Step-by-step setup instructions for each integration
+
+### 🛡️ **Safety & Security**
+- Built-in safety guardrails and content validation
+- Confirmation required for bulk actions
+- API key protection and PII sanitization
 
 ## Getting Started
 
@@ -29,10 +58,13 @@ Senior multidisciplinary marketing strategist and operator AI agent with 15 year
 
 - Node.js 18+ 
 - npm or yarn package manager
+- OpenAI API key
 
 ### Installation
 
 ```bash
+git clone https://github.com/nealpgards/nealy-ai.git
+cd nealy-ai
 npm install
 ```
 
@@ -43,12 +75,9 @@ npm install
 cp .env.local.example .env.local
 ```
 
-2. Fill in your API keys in `.env.local`:
+2. Add your OpenAI API key to `.env.local`:
 ```bash
 OPENAI_API_KEY=your_openai_api_key_here
-AIRTABLE_API_KEY=your_airtable_api_key_here
-NOTION_API_KEY=your_notion_api_key_here
-# ... other API keys
 ```
 
 ### Development
@@ -57,7 +86,7 @@ NOTION_API_KEY=your_notion_api_key_here
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser.
+Open [http://localhost:3000](http://localhost:3000) to start chatting with nealy.ai.
 
 ## Deployment
 
@@ -68,76 +97,86 @@ Open [http://localhost:3000](http://localhost:3000) with your browser.
 npm i -g vercel
 ```
 
-2. Login to Vercel:
+2. Login and deploy:
 ```bash
 vercel login
-```
-
-3. Deploy:
-```bash
 vercel
 ```
 
-4. Set environment variables in Vercel dashboard:
+3. Set environment variables in Vercel dashboard:
    - Go to your project settings
-   - Add all API keys from `.env.local.example`
+   - Add `OPENAI_API_KEY` with your OpenAI API key
    - Deploy automatically triggers on main branch pushes
-
-### Manual Deployment
-
-```bash
-npm run build
-npm run start
-```
 
 ## API Routes
 
-- `/api/agent` - Core chat inference endpoint
-- `/api/data/*` - Data connector endpoints for integrations
-
-## Connected Data Sources
-
-- **Airtable** - Campaign + asset database
-- **Notion** - Project management & knowledge base  
-- **Slack** - Team communications
-- **Google Analytics 4** - Web + funnel metrics
-- **Search Console & SEMrush** - Organic insights
-- **HubSpot/Salesforce** - Pipeline + attribution
-
-## Operating Instructions
-
-**Process**: Think → Plan → Execute → Report
-
-- Include reasoning comments (// thought:) before major outputs
-- For data requirements, call relevant API route, return 5-row preview + insights
-- Present numbered actions with impact & effort estimates
-- Keep copy in brand voice: Modern, clear, functional, engineer-friendly
-- Be concise—no filler
+- `/api/agent` - Core chat inference endpoint with GPT-4 Turbo
+- `/api/data/airtable` - Airtable integration (mock data)
+- `/api/data/analytics` - Analytics data connector (mock data)
+- `/api/data/crm` - CRM integration (mock data)
 
 ## Response Formats
 
+nealy.ai automatically detects task types and formats responses accordingly:
+
 | Task Type | Format |
 |-----------|--------|
-| Strategy deck | Markdown outline → optional PPT link |
-| Copy / Ad variations | Table: Version · Hook · CTA |
-| Data insight | Bulleted takeaway + inline chart link |
-| Roadmap / checklist | Nested Markdown list |
-| API query result | 5-row preview table, then JSON link |
+| Strategy | Markdown outline with action items |
+| Copy/Creative | Table with versions, hooks, and CTAs |
+| Data Analysis | Bulleted insights with visualizations |
+| Roadmap | Nested checklists with priorities |
+| Audit | Prioritized findings with impact estimates |
 
-## Safety & Guardrails
+## Usage Examples
 
-- Never expose private keys or raw PII
-- Confirm before sending bulk emails or publishing live assets
-- Cite all third-party data sources (domain + date)
+**"Audit my website's SEO and find quick wins"**
+- Returns prioritized SEO improvements with estimated traffic impact
 
-## Example Requests
+**"Draft LinkedIn ads for B2B lead generation"**
+- Creates ad variations in table format with hooks and CTAs
 
-1. "Audit dtgpower.com and surface the top 20 SEO quick wins; estimate monthly traffic lift."
-2. "Draft three LinkedIn ad sets targeting 3PL ops managers—$10k budget split."
-3. "Pull last quarter's funnel metrics, visualize drop-offs, and suggest two experiments to raise MQL→SQL conversion."
-4. "Write a 5-email onboarding drip for Battery Workstation buyers; personalize by industry."
-5. "Spin up a Notion kanban board with this quarter's campaign roadmap—columns: Idea, In-Progress, QA, Live."
+**"Analyze our funnel metrics and suggest improvements"**
+- Provides data insights with conversion optimization recommendations
+
+**"Create a content calendar for product launch"**
+- Generates structured campaign timeline with deliverables
+
+## Operating Philosophy
+
+nealy.ai follows a **Think → Plan → Execute → Report** methodology:
+
+- **Direct, data-driven approach** - No hype, just results
+- **ROI-focused recommendations** - Every suggestion includes impact estimates  
+- **Engineering-friendly communication** - Clear, functional, modern tone
+- **Safety-first design** - Built-in guardrails and confirmation flows
+
+## Connected Integrations
+
+### Slack
+- Send marketing insights and reports to team channels
+- Real-time campaign performance updates
+- Automated alert system for key metrics
+
+### Notion  
+- Create comprehensive marketing reports and campaign plans
+- Build content calendars and editorial workflows
+- Document strategic decisions and learnings
+
+### Google Drive
+- Save marketing assets, creative files, and campaign materials
+- Organize reports and analytics in structured folders
+- Share deliverables with team and stakeholders
 
 ## Contributing
 
-Direct, data-driven, zero hype. When brainstorming, allow creativity but finish with a ranked shortlist.
+nealy.ai is Neal's personal marketing assistant, but the codebase demonstrates modern AI application architecture with:
+
+- Clean separation of concerns
+- Type-safe interfaces
+- Modular component design
+- Comprehensive error handling
+- Professional UI/UX patterns
+
+## License
+
+ISC License - Built by Neal Gardner
