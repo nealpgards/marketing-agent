@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     // // thought: Placeholder for creating/updating CRM records
     return NextResponse.json({
-      message: \`\${entity} updated successfully\`,
+      message: `${entity} updated successfully`,
       entity,
       records_affected: Array.isArray(data) ? data.length : 1,
       timestamp: new Date().toISOString()
