@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': \`Bearer \${openaiApiKey}\`,
+        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
             role: 'system',
             content: systemPrompt
           },
-          ...(context ? [{ role: 'user', content: \`Context: \${context}\` }] : []),
+          ...(context ? [{ role: 'user', content: `Context: ${context}` }] : []),
           {
             role: 'user',
             content: message
