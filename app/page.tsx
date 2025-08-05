@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import MessageRenderer from '@/components/MessageRenderer'
 import { ConversationStorage, type Conversation } from '@/lib/conversationStorage'
+import { ConnectedAppsStorage, type ConnectedApp } from '@/lib/connectedApps'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -17,6 +18,11 @@ interface ConfirmationDialog {
   risks: string[]
 }
 
+interface SetupModal {
+  app: ConnectedApp
+  isOpen: boolean
+}
+
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -25,14 +31,18 @@ export default function Home() {
   const [pendingMessage, setPendingMessage] = useState('')
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
+  const [connectedApps, setConnectedApps] = useState<ConnectedApp[]>([])
+  const [setupModal, setSetupModal] = useState<SetupModal | null>(null)
   
-  // Load conversations on mount
+  // Load conversations and connected apps on mount
   useEffect(() => {
     const savedConversations = ConversationStorage.getAllConversations()
     const currentId = ConversationStorage.getCurrentConversationId()
+    const apps = ConnectedAppsStorage.getConnectedApps()
     
     setConversations(savedConversations)
     setCurrentConversationId(currentId)
+    setConnectedApps(apps)
     
     // Load current conversation messages
     if (currentId) {
@@ -99,6 +109,22 @@ export default function Home() {
         startNewConversation()
       }
     }
+  }
+
+  const openSetupModal = (app: ConnectedApp) => {
+    setSetupModal({ app, isOpen: true })
+  }
+
+  const closeSetupModal = () => {
+    setSetupModal(null)
+  }
+
+  const toggleAppConnection = (appId: string) => {
+    const updatedApps = connectedApps.map(app => 
+      app.id === appId ? { ...app, connected: !app.connected } : app
+    )
+    setConnectedApps(updatedApps)
+    ConnectedAppsStorage.updateAppConnection(appId, !connectedApps.find(app => app.id === appId)?.connected)
   }
 
   const handleSend = async (messageToSend?: string, confirmed = false) => {
@@ -425,6 +451,59 @@ export default function Home() {
             )}
           </div>
         </div>
+        
+        {/* Connected Apps Section */}
+        <div style={{ borderTop: '1px solid #e5e7eb', padding: '16px 8px' }}>
+          <div style={{ fontSize: '12px', fontWeight: '500', color: '#6b7280', marginBottom: '12px', padding: '0 8px' }}>
+            Connected Apps
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            {connectedApps.map((app) => (
+              <div
+                key={app.id}
+                onClick={() => openSetupModal(app)}
+                style={{
+                  padding: '10px 8px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  backgroundColor: 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  opacity: app.connected ? 1 : 0.5
+                }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <span style={{ fontSize: '16px' }}>{app.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ 
+                    color: app.connected ? '#374151' : '#9ca3af',
+                    fontWeight: app.connected ? '500' : '400',
+                    marginBottom: '2px'
+                  }}>
+                    {app.name}
+                  </div>
+                  <div style={{ 
+                    fontSize: '12px', 
+                    color: app.connected ? '#10b981' : '#9ca3af'
+                  }}>
+                    {app.connected ? 'Connected' : 'Not connected'}
+                  </div>
+                </div>
+                
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: app.connected ? '#10b981' : '#d1d5db'
+                }} />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Main Content */}
@@ -693,6 +772,170 @@ export default function Home() {
                 }}
               >
                 Proceed Anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Setup Modal */}
+      {setupModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 50
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '600px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflowY: 'auto',
+            margin: '16px'
+          }}>
+            {/* Modal Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '24px' }}>{setupModal.app.icon}</span>
+                <h3 style={{ fontSize: '20px', fontWeight: '600', margin: 0, color: '#111827' }}>
+                  {setupModal.app.setupInstructions.title}
+                </h3>
+              </div>
+              <button
+                onClick={closeSetupModal}
+                style={{
+                  padding: '8px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: '#6b7280',
+                  cursor: 'pointer',
+                  borderRadius: '6px'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Connection Status */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px 16px',
+              backgroundColor: setupModal.app.connected ? '#f0fdf4' : '#fef3f2',
+              borderRadius: '8px',
+              marginBottom: '20px',
+              border: `1px solid ${setupModal.app.connected ? '#bbf7d0' : '#fecaca'}`
+            }}>
+              <div style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: setupModal.app.connected ? '#10b981' : '#ef4444'
+              }} />
+              <span style={{ 
+                fontSize: '14px', 
+                fontWeight: '500',
+                color: setupModal.app.connected ? '#047857' : '#dc2626'
+              }}>
+                {setupModal.app.connected ? 'Connected' : 'Not Connected'}
+              </span>
+            </div>
+
+            {/* Setup Instructions */}
+            <div style={{ marginBottom: '24px' }}>
+              <h4 style={{ fontSize: '16px', fontWeight: '500', marginBottom: '12px', color: '#374151', margin: '0 0 12px 0' }}>
+                Setup Instructions:
+              </h4>
+              
+              <ol style={{ 
+                paddingLeft: '20px', 
+                margin: 0,
+                lineHeight: '1.6'
+              }}>
+                {setupModal.app.setupInstructions.steps.map((step, index) => (
+                  <li key={index} style={{ 
+                    marginBottom: '8px', 
+                    color: '#374151',
+                    fontSize: '14px'
+                  }}>
+                    {step}
+                  </li>
+                ))}
+              </ol>
+              
+              {setupModal.app.setupInstructions.note && (
+                <div style={{
+                  marginTop: '16px',
+                  padding: '12px',
+                  backgroundColor: '#f8fafc',
+                  borderRadius: '6px',
+                  border: '1px solid #e2e8f0'
+                }}>
+                  <div style={{ fontSize: '12px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>
+                    Note:
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#475569', lineHeight: '1.5' }}>
+                    {setupModal.app.setupInstructions.note}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Actions */}
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => toggleAppConnection(setupModal.app.id)}
+                style={{
+                  flex: 1,
+                  minWidth: '120px',
+                  padding: '10px 16px',
+                  backgroundColor: setupModal.app.connected ? '#ef4444' : '#10b981',
+                  color: '#ffffff',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = setupModal.app.connected ? '#dc2626' : '#059669'
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = setupModal.app.connected ? '#ef4444' : '#10b981'
+                }}
+              >
+                {setupModal.app.connected ? 'Disconnect' : 'Mark as Connected'}
+              </button>
+              
+              <button
+                onClick={closeSetupModal}
+                style={{
+                  flex: 1,
+                  minWidth: '120px',
+                  padding: '10px 16px',
+                  backgroundColor: '#f3f4f6',
+                  color: '#374151',
+                  borderRadius: '6px',
+                  border: '1px solid #d1d5db',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e5e7eb'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+              >
+                Close
               </button>
             </div>
           </div>
